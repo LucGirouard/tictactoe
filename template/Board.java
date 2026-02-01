@@ -82,4 +82,18 @@ class Board
         // partie en cours
         return 0;
     }
+
+    // génère la liste des coups possibles (cases vides)
+    public ArrayList<Move> getPossibleMoves(){
+        ArrayList<Move> possibleMoves = new ArrayList<Move>();
+        for (int i = 0; i < 3; i++){
+            for (int j = 0; j < 3; j++){
+                if(board[i][j] == Mark.EMPTY){
+                    possibleMoves.add( new Move(i, j));
+                }
+            }
+        }
+        return possibleMoves;
+
+    }
 }
