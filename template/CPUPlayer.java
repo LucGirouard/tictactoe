@@ -104,7 +104,71 @@ class CPUPlayer
     // ont le même score.
     public ArrayList<Move> getNextMoveAB(Board board){
         numExploredNodes = 0;
-        return null; // A COMPLETER
+        int bestValue = Integer.MIN_VALUE;
+        
+        ArrayList<Move> bestMoves = new ArrayList<Move>();
+        ArrayList<Move> possibleMoves = board.getPossibleMoves();
+        int depth = possibleMoves.size();
+
+        for (Move move : possibleMoves) {
+            board.play(move, cpu);
+            //demande a alpha beta d'aller checher le meilleur coup...
+            int moveValue = alphaBeta(board, getOpponentMark(cpu), depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            board.play(move, Mark.EMPTY); // annule le coup (simuler)
+
+            if (moveValue > bestValue) {
+                bestValue = moveValue;
+                bestMoves.clear();
+                bestMoves.add(move);
+            } else if (moveValue == bestValue) {
+                bestMoves.add(move);
+            }
+        }
+
+        return bestMoves;
+    }
+
+    private int alphaBeta(Board board, Mark mark, int depth, int alpha, int beta) {
+        numExploredNodes++;
+        int score = board.evaluate(cpu);
+        if(score == 100 || score == -100 || depth == 0 || board.getPossibleMoves().isEmpty()) {
+            return score;
+        }
+
+        if(mark == cpu){
+            int bestScore = Integer.MIN_VALUE;
+            for( Move move : board.getPossibleMoves()){
+                board.play(move, mark);
+                int tempScore = alphaBeta(board, getOpponentMark(mark), depth - 1, alpha, beta);
+                board.play(move, Mark.EMPTY); //annule "move", pour simuler le fait de jouer
+
+                bestScore = Math.max(bestScore, tempScore);
+                
+                alpha = Math.max(alpha, bestScore);
+                if(beta <= alpha){
+                    break; // beta cut-off
+                }
+            }
+            return bestScore;
+        } 
+        // minimizing player
+        else{
+            int bestScore = Integer.MAX_VALUE;
+            for( Move move : board.getPossibleMoves()){
+                board.play(move, mark);
+                int tempScore = alphaBeta(board, getOpponentMark(mark), depth - 1, alpha, beta);
+                board.play(move, Mark.EMPTY); //annule "move", pour simuler le fait de jouer
+
+                bestScore = Math.min(bestScore, tempScore);
+                
+                beta = Math.min(beta, bestScore);
+                if(beta <= alpha){
+                    break; // alpha cut-off
+                }
+            }
+            return bestScore;
+        }
+       
     }
 
 }
